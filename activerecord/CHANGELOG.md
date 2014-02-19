@@ -1,3 +1,28 @@
+*   Perform necessary deeper encoding when hstore is inside an array.
+
+    Fixes #11135.
+
+    *Josh Goodall*, *Genadi Samokovarov*
+
+*   Properly detect if a connection is still active before using it
+    in multi-threaded environments.
+
+    Fixes #12867.
+
+    *Kevin Casey*, *Matthew Draper*, *William (B.J.) Snow Orvis*
+
+*   When inverting add_index use the index name if present instead of
+    the columns.
+
+    If there are two indices with matching columns and one of them is
+    explicitly named then reverting the migration adding the named one
+    would instead drop the unnamed one.
+
+    The inversion of add_index will now drop the index by its name if
+    it is present.
+
+    *Hubert Dąbrowski*
+
 *   Make sure transaction state gets reset after a commit operation on the record.
 
     If a new transaction was open inside a callback, the record was loosing track
@@ -362,6 +387,18 @@
     been generated through the use of `where.not`.
 
     *Eric Hankins*
+
+
+## Rails 4.0.3 (February 18, 2014) ##
+
+*   Correctly escape PostgreSQL arrays.
+
+    Fixes: CVE-2014-0080
+
+
+## Rails 4.0.2 (December 02, 2013) ##
+
+*No changes*
 
 
 ## Rails 4.0.1 (November 01, 2013) ##
