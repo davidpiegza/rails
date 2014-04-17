@@ -1,3 +1,190 @@
+*   Calling `delete_all` on an unloaded `CollectionProxy` no longer
+    generates a SQL statement containing each id of the collection:
+
+    Before:
+
+        DELETE FROM `model` WHERE `model`.`parent_id` = 1
+        AND `model`.`id` IN (1, 2, 3...)
+
+    After:
+
+        DELETE FROM `model` WHERE `model`.`parent_id` = 1
+
+    *Eileen M. Uchitelle*, *Aaron Patterson*
+
+*   Fixed a problem where count used with a grouping was not returning a Hash.
+
+    Fixes #14721.
+
+    *Eric Chahin*
+
+*   Do not quote uuid default value on `change_column`.
+
+    Fixes #14604.
+
+    *Eric Chahin*
+
+*   The comparison between `Relation` and `CollectionProxy` should be consistent.
+
+    Example:
+
+        author.posts == Post.where(author_id: author.id)
+        # => true
+        Post.where(author_id: author.id) == author.posts
+        # => true
+
+    Fixes #13506.
+
+    *Lauro Caetano*
+
+*   PostgreSQL adapter only warns once for every missing OID per connection.
+
+    Fixes #14275.
+
+    *Matthew Draper*, *Yves Senn*
+
+*   Fixed error for aggregate methods (`empty?`, `any?`, `count`) with `select`
+    which created invalid SQL.
+
+    Fixes #13648.
+
+    *Simon Woker*
+
+*   Fix insertion of records via `has_many :through` association with scope.
+
+    Fixes #3548.
+
+    *Ivan Antropov*
+
+*   Make possible to have an association called `records`.
+
+    Fixes #11645.
+
+    *prathamesh-sonpatki*
+
+*   `to_sql` on an association now matches the query that is actually executed, where it
+    could previously have incorrectly accrued additional conditions (e.g. as a result of
+    a previous query). CollectionProxy now always defers to the association scope's
+    `arel` method so the (incorrect) inherited one should be entirely concealed.
+
+    Fixes #14003.
+
+    *Jefferson Lai*
+
+*   Fixed error when using `with_options` with lambda.
+
+    Fixes #9805.
+
+    *Lauro Caetano*
+
+*   Fixed error when specifying a non-empty default value on a PostgreSQL array column.
+
+    Fixes #10613.
+
+    *Luke Steensen*
+
+*   Make possible to change `record_timestamps` inside Callbacks.
+
+    *Tieg Zaharia*
+
+*   Fixed error where .persisted? throws SystemStackError for an unsaved model with a
+    custom primary key that didn't save due to validation error.
+
+    Fixes #14393.
+
+    *Chris Finne*
+
+*   `rake db:structure:dump` only dumps schema information if the schema
+    migration table exists.
+
+    Fixes #14217.
+
+    *Yves Senn*
+
+*   Add support for `Relation` be passed as parameter on `QueryCache#select_all`.
+
+    Fixes #14361.
+
+    *arthurnn*
+
+*   Only save `has_one` associations if record has changes. Previously after save
+    related callbacks, such as `#after_commit`, were triggered when the
+    `has_one` object did not get saved to the db.
+
+    *Alan Kennedy*
+
+
+## Rails 4.1.0 (April 8, 2014) ##
+
+*   Fixed a problem where an enum would overwrite values of another enum
+    with the same name in an unrelated class.
+
+    Fixes #14607.
+
+    *Evan Whalen*
+
+
+*   Block a few default Class methods as scope name.
+
+    For instance, this will raise:
+
+        scope :public, -> { where(status: 1) }
+
+    *arthurnn*
+
+*   Deprecate SQLite database URLs containing an
+    authority.
+
+    The current "correct" spellings for in-memory, relative, and
+    absolute URLs, respectively, are:
+
+        sqlite3::memory:
+        sqlite3:relative/path
+        sqlite3:/full/path
+
+    The previous spelling (`sqlite3:///relative/path`) continues to work
+    as it did in Rails 4.0, but with a deprecation warning: in the next
+    release, that spelling will instead be interpreted as an absolute
+    path.
+
+    *Matthew Draper*
+
+*   `where.not` adds `references` for `includes` like normal `where` calls do.
+
+    Fixes #14406.
+
+    *Yves Senn*
+
+*   `includes` is able to detect the right preloading strategy when string
+    joins are involved.
+
+    Fixes #14109.
+
+    *Aaron Patterson*, *Yves Senn*
+
+*   Fixed error with validation with enum fields for records where the
+    value for any enum attribute is always evaluated as 0 during
+    uniqueness validation.
+
+    Fixes #14172.
+
+    *Vilius Luneckas* *Ahmed AbouElhamayed*
+
+*   `before_add` callbacks are fired before the record is saved on
+    `has_and_belongs_to_many` assocations *and* on `has_many :through`
+    associations.  Before this change, `before_add` callbacks would be fired
+    before the record was saved on `has_and_belongs_to_many` associations, but
+    *not* on `has_many :through` associations.
+
+    Fixes #14144.
+
+*   Fixed STI classes not defining an attribute method if there is a
+    conflicting private method defined on its ancestors.
+
+    Fixes #11569.
+
+    *Godfrey Chan*
+
 *   Default scopes are no longer overriden by chained conditions.
 
     Before this change when you defined a `default_scope` in a model
@@ -46,7 +233,7 @@
 
         class User < ActiveRecord::Base
           default_scope { where state: 'pending' }
-          scope :active, -> { unescope(where: :state).where(state: 'active') }
+          scope :active, -> { unscope(where: :state).where(state: 'active') }
           scope :inactive, -> { rewhere state: 'inactive' }
         end
 

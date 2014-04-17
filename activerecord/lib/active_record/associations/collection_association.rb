@@ -24,10 +24,6 @@ module ActiveRecord
     # If you need to work on all current children, new and existing records,
     # +load_target+ and the +loaded+ flag are your friends.
     class CollectionAssociation < Association #:nodoc:
-      def initialize(owner, reflection)
-        super
-        @proxy = CollectionProxy.create(klass, self)
-      end
 
       # Implements the reader method, e.g. foo.items for Foo.has_many :items
       def reader(force_reload = false)
@@ -37,7 +33,7 @@ module ActiveRecord
           reload
         end
 
-        @proxy
+        @proxy ||= CollectionProxy.create(klass, self)
       end
 
       # Implements the writer method, e.g. foo.items= for Foo.has_many :items
@@ -138,11 +134,11 @@ module ActiveRecord
       end
 
       def create(attributes = {}, &block)
-        create_record(attributes, &block)
+        _create_record(attributes, &block)
       end
 
       def create!(attributes = {}, &block)
-        create_record(attributes, true, &block)
+        _create_record(attributes, true, &block)
       end
 
       # Add +records+ to this association. Returns +self+ so method calls may
@@ -253,7 +249,7 @@ module ActiveRecord
         dependent = _options[:dependent] || options[:dependent]
 
         if records.first == :all
-          if loaded? || dependent == :destroy
+          if (loaded? || dependent == :destroy) && dependent != :delete_all
             delete_or_destroy(load_target, dependent)
           else
             delete_records(:all, dependent)
@@ -452,13 +448,13 @@ module ActiveRecord
           persisted + memory
         end
 
-        def create_record(attributes, raise = false, &block)
+        def _create_record(attributes, raise = false, &block)
           unless owner.persisted?
             raise ActiveRecord::RecordNotSaved, "You cannot call create unless the parent is saved"
           end
 
           if attributes.is_a?(Array)
-            attributes.collect { |attr| create_record(attr, raise, &block) }
+            attributes.collect { |attr| _create_record(attr, raise, &block) }
           else
             transaction do
               add_to_target(build_record(attributes)) do |record|
@@ -517,13 +513,13 @@ module ActiveRecord
           target
         end
 
-        def concat_records(records)
+        def concat_records(records, should_raise = false)
           result = true
 
           records.flatten.each do |record|
             raise_on_type_mismatch!(record)
             add_to_target(record) do |rec|
-              result &&= insert_record(rec) unless owner.new_record?
+              result &&= insert_record(rec, true, should_raise) unless owner.new_record?
             end
           end
 

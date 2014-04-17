@@ -762,25 +762,12 @@ module ApplicationTests
       end
     end
 
-    test "lookup config.log_level with custom logger (stdlib Logger)" do
+    test "config.log_level with custom logger" do
       make_basic_app do |app|
         app.config.logger = Logger.new(STDOUT)
         app.config.log_level = :info
       end
       assert_equal Logger::INFO, Rails.logger.level
-    end
-
-    test "assign log_level as is with custom logger (third party logger)" do
-      logger_class = Class.new do
-        attr_accessor :level
-      end
-      logger_instance = logger_class.new
-      make_basic_app do |app|
-        app.config.logger = logger_instance
-        app.config.log_level = :info
-      end
-      assert_equal logger_instance, Rails.logger
-      assert_equal :info, Rails.logger.level
     end
 
     test "respond_to? accepts include_private" do
@@ -805,6 +792,82 @@ module ApplicationTests
       require "#{app_path}/config/environment"
 
       assert ActiveRecord::Base.dump_schema_after_migration
+    end
+
+    test "rake_tasks block works at instance level" do
+      $ran_block = false
+
+      app_file "config/environments/development.rb", <<-RUBY
+        Rails.application.configure do
+          rake_tasks do
+            $ran_block = true
+          end
+        end
+      RUBY
+
+      require "#{app_path}/config/environment"
+
+      assert !$ran_block
+      require 'rake'
+      require 'rake/testtask'
+      require 'rdoc/task'
+
+      Rails.application.load_tasks
+      assert $ran_block
+    end
+
+    test "generators block works at instance level" do
+      $ran_block = false
+
+      app_file "config/environments/development.rb", <<-RUBY
+        Rails.application.configure do
+          generators do
+            $ran_block = true
+          end
+        end
+      RUBY
+
+      require "#{app_path}/config/environment"
+
+      assert !$ran_block
+      Rails.application.load_generators
+      assert $ran_block
+    end
+
+    test "console block works at instance level" do
+      $ran_block = false
+
+      app_file "config/environments/development.rb", <<-RUBY
+        Rails.application.configure do
+          console do
+            $ran_block = true
+          end
+        end
+      RUBY
+
+      require "#{app_path}/config/environment"
+
+      assert !$ran_block
+      Rails.application.load_console
+      assert $ran_block
+    end
+
+    test "runner block works at instance level" do
+      $ran_block = false
+
+      app_file "config/environments/development.rb", <<-RUBY
+        Rails.application.configure do
+          runner do
+            $ran_block = true
+          end
+        end
+      RUBY
+
+      require "#{app_path}/config/environment"
+
+      assert !$ran_block
+      Rails.application.load_runner
+      assert $ran_block
     end
   end
 end

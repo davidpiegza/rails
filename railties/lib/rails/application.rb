@@ -87,7 +87,7 @@ module Rails
     class << self
       def inherited(base)
         super
-        Rails.application ||= base.instance
+        base.instance
       end
 
       # Makes the +new+ method public.
@@ -116,6 +116,8 @@ module Rails
       @ordered_railties  = nil
       @railties          = nil
       @message_verifiers = {}
+
+      Rails.application ||= self
 
       add_lib_to_load_path!
       ActiveSupport.run_load_hooks(:before_configuration, self)
@@ -230,6 +232,18 @@ module Rails
       self.class.runner(&blk)
     end
 
+    # Sends any console called in the instance of a new application up
+    # to the +console+ method defined in Rails::Railtie.
+    def console(&blk)
+      self.class.console(&blk)
+    end
+
+    # Sends any generators called in the instance of a new application up
+    # to the +generators+ method defined in Rails::Railtie.
+    def generators(&blk)
+      self.class.generators(&blk)
+    end
+
     # Sends the +isolate_namespace+ method up to the class method.
     def isolate_namespace(mod)
       self.class.isolate_namespace(mod)
@@ -330,6 +344,25 @@ module Rails
 
     def helpers_paths #:nodoc:
       config.helpers_paths
+    end
+
+    console do
+      require "pp"
+    end
+
+    console do
+      unless ::Kernel.private_method_defined?(:y)
+        if RUBY_VERSION >= '2.0'
+          require "psych/y"
+        else
+          module ::Kernel
+            def y(*objects)
+              puts ::Psych.dump_stream(*objects)
+            end
+            private :y
+          end
+        end
+      end
     end
 
   protected

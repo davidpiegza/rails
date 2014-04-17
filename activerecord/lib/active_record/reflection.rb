@@ -151,7 +151,7 @@ module ActiveRecord
         super ||
           other_aggregation.kind_of?(self.class) &&
           name == other_aggregation.name &&
-          other_aggregation.options &&
+          !other_aggregation.options.nil? &&
           active_record == other_aggregation.active_record
       end
 
@@ -621,7 +621,7 @@ module ActiveRecord
       end
 
       def source_reflection_name # :nodoc:
-        return @source_reflection_name if @source_reflection_name
+        return @source_reflection_name.to_sym if @source_reflection_name
 
         names = [name.to_s.singularize, name].collect { |n| n.to_sym }.uniq
         names = names.find_all { |n|

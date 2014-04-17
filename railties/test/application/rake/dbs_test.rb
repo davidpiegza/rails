@@ -17,11 +17,11 @@ module ApplicationTests
       end
 
       def database_url_db_name
-        File.join(app_path, "db/database_url_db.sqlite3")
+        "db/database_url_db.sqlite3"
       end
 
       def set_database_url
-        ENV['DATABASE_URL'] = File.join("sqlite3://:@localhost", database_url_db_name)
+        ENV['DATABASE_URL'] = "sqlite3:#{database_url_db_name}"
         # ensure it's using the DATABASE_URL
         FileUtils.rm_rf("#{app_path}/config/database.yml")
       end
@@ -147,6 +147,18 @@ module ApplicationTests
         set_database_url
         expected[:database] = database_url_db_name
         db_structure_dump_and_load
+      end
+
+      test 'db:structure:dump does not dump schema information when no migrations are used' do
+        Dir.chdir(app_path) do
+          # create table without migrations
+          `bundle exec rails runner 'ActiveRecord::Base.connection.create_table(:posts) {|t| t.string :title }'`
+
+          stderr_output = capture(:stderr) { `bundle exec rake db:structure:dump` }
+          assert_empty stderr_output
+          structure_dump = File.read("db/structure.sql")
+          assert_match(/CREATE TABLE \"posts\"/, structure_dump)
+        end
       end
 
       def db_test_load_structure

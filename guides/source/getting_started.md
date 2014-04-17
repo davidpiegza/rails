@@ -57,9 +57,9 @@ learned elsewhere, you may have a less happy experience.
 
 The Rails philosophy includes two major guiding principles:
 
-* **Don't Repeat Yourself:** DRY is a principle of software development which 
+* **Don't Repeat Yourself:** DRY is a principle of software development which
   states that "Every piece of knowledge must have a single, unambiguous, authoritative
-  representation within a system." By not writing the same information over and over 
+  representation within a system." By not writing the same information over and over
   again, our code is more maintainable, more extensible, and less buggy.
 * **Convention Over Configuration:** Rails has opinions about the best way to do many
   things in a web application, and defaults to this set of conventions, rather than
@@ -206,7 +206,7 @@ This will fire up WEBrick, a web server distributed with Ruby by default. To see
 your application in action, open a browser window and navigate to
 <http://localhost:3000>. You should see the Rails default information page:
 
-![Welcome aboard screenshot](images/getting_started/rails_welcome.jpg)
+![Welcome aboard screenshot](images/getting_started/rails_welcome.png)
 
 TIP: To stop the web server, hit Ctrl+C in the terminal window where it's
 running. To verify the server has stopped you should see your command prompt
@@ -612,7 +612,7 @@ def create
 end
 ```
 
-The `render` method here is taking a very simple hash with a key of `text` and
+The `render` method here is taking a very simple hash with a key of `plain` and
 value of `params[:article].inspect`. The `params` method is the object which
 represents the parameters (or fields) coming in from the form. The `params`
 method returns an `ActiveSupport::HashWithIndifferentAccess` object, which
@@ -751,8 +751,8 @@ Rails has several security features that help you write secure applications,
 and you're running into one of them now. This one is called
 `strong_parameters`, which requires us to tell Rails exactly which parameters
 we want to accept in our controllers. In this case, we want to allow the
-`title` and `text` parameters, so change your `create` controller action to
-look like this:
+`title` and `text` parameters, so add the new `article_params` method, and
+change your `create` controller action to use it, like this:
 
 ```ruby
 def create
@@ -900,7 +900,7 @@ Also add a link in `app/views/articles/new.html.erb`, underneath the form, to
 go back to the `index` action:
 
 ```erb
-<%= form_for :article do |f| %>
+<%= form_for :article, url: articles_path do |f| %>
   ...
 <% end %>
 
@@ -1119,10 +1119,10 @@ The `method: :patch` option tells Rails that we want this form to be submitted
 via the `PATCH` HTTP method which is the HTTP method you're expected to use to
 **update** resources according to the REST protocol.
 
-The first parameter of the `form_tag` can be an object, say, `@article` which would
+The first parameter of `form_for` can be an object, say, `@article` which would
 cause the helper to fill in the form with the fields of the object. Passing in a
-symbol (`:article`) with the same name as the instance variable (`@article`) also 
-automagically leads to the same behavior. This is what is happening here. More details 
+symbol (`:article`) with the same name as the instance variable (`@article`) also
+automagically leads to the same behavior. This is what is happening here. More details
 can be found in [form_for documentation](http://api.rubyonrails.org/classes/ActionView/Helpers/FormHelper.html#method-i-form_for).
 
 Next we need to create the `update` action in
@@ -1396,7 +1396,7 @@ class CreateComments < ActiveRecord::Migration
       t.text :body
 
       # this line adds an integer column called `article_id`.
-      t.references :article, index: true 
+      t.references :article, index: true
 
       t.timestamps
     end

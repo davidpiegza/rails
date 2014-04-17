@@ -237,6 +237,7 @@ class AppGeneratorTest < Rails::Generators::TestCase
 
   def test_generator_if_skip_sprockets_is_given
     run_generator [destination_root, "--skip-sprockets"]
+    assert_no_file "config/initializers/assets.rb"
     assert_file "config/application.rb" do |content|
       assert_match(/#\s+require\s+["']sprockets\/railtie["']/, content)
     end
@@ -252,7 +253,6 @@ class AppGeneratorTest < Rails::Generators::TestCase
       assert_no_match(/config\.assets\.digest = true/, content)
       assert_no_match(/config\.assets\.js_compressor = :uglifier/, content)
       assert_no_match(/config\.assets\.css_compressor = :sass/, content)
-      assert_no_match(/config\.assets\.version = '1\.0'/, content)
     end
   end
 
@@ -262,13 +262,6 @@ class AppGeneratorTest < Rails::Generators::TestCase
       assert_gem "therubyrhino"
     else
       assert_file "Gemfile", /# gem\s+["']therubyracer["']+, \s+platforms: :ruby$/
-    end
-  end
-
-  def test_inclusion_of_plateform_dependent_gems
-    run_generator([destination_root])
-    if RUBY_ENGINE == 'rbx'
-      assert_gem 'rubysl'
     end
   end
 

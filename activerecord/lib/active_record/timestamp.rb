@@ -43,7 +43,7 @@ module ActiveRecord
 
   private
 
-    def create_record
+    def _create_record
       if self.record_timestamps
         current_time = current_time_from_proper_timezone
 

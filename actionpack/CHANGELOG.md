@@ -1,9 +1,45 @@
+*   Returns null type format when format is not know and controller is using `any`
+    format block.
+
+    Fixes #14462.
+
+    *Rafael Mendonça França*
+
+*   Only make deeply nested routes shallow when parent is shallow.
+
+    Fixes #14684.
+
+    *Andrew White*, *James Coglan*
+
+*   Swapped the parameters of assert_equal in `assert_select` so that the
+    proper values were printed correctly
+
+    Fixes #14422.
+
+    *Vishal Lal*
+
+*   The method `shallow?` returns false if the parent resource is a singleton so
+    we need to check if we're not inside a nested scope before copying the :path
+    and :as options to their shallow equivalents.
+
+    Fixes #14388.
+
+    *Andrew White*
+
+
+## Rails 4.1.0 (April 8, 2014) ##
+
+*   Fix URL generation in controller tests with request-dependent
+    `default_url_options` methods.
+
+    *Tony Wooster*
+
 *   Introduce `render :html` as an option to render HTML content with a content
     type of `text/html`. This rendering option calls `ERB::Util.html_escape`
     internally to escape unsafe HTML string, so you will have to mark your
     string as html safe if you have any HTML tag in it.
 
-    Please see #12374 for more detail.
+    See #14062, #12374.
 
     *Prem Sichanugrist*
 
@@ -11,19 +47,19 @@
     of `text/plain`. This is the preferred option if you are planning to render
     a plain text content.
 
-    Please see #12374 for more detail.
+    See #14062, #12374.
 
     *Prem Sichanugrist*
 
 *   Introduce `render :body` as an option for sending a raw content back to
-    browser. Note that this rendering option will unset the default content type
-    and does not include "Content-Type" header back in the response.
+    browser. Note that this rendering option does not include "Content-Type"
+    header back in the response.
 
-    You should only use this option if you are expecting the "Content-Type"
-    header to not be set. More information on "Content-Type" header can be found
+    You should only use this option if you don't care about the content type
+    of the response. More information on "Content-Type" header can be found
     on RFC 2616, section 7.2.1.
 
-    Please see #12374 for more detail.
+    See #14062, #12374.
 
     *Prem Sichanugrist*
 
@@ -117,7 +153,7 @@
 
 *   Fix stream closing when sending file with `ActionController::Live` included.
 
-    Fixes #12381
+    Fixes #12381.
 
     *Alessandro Diaferia*
 

@@ -22,8 +22,11 @@ require 'models/engine'
 require 'models/categorization'
 require 'models/minivan'
 require 'models/speedometer'
-require 'models/pirate'
-require 'models/ship'
+require 'models/college'
+require 'models/student'
+require 'models/reference'
+require 'models/job'
+
 
 class HasManyAssociationsTestForReorderWithJoinDependency < ActiveRecord::TestCase
   fixtures :authors, :posts, :comments
@@ -41,7 +44,7 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
   fixtures :accounts, :categories, :companies, :developers, :projects,
            :developers_projects, :topics, :authors, :comments,
            :people, :posts, :readers, :taggings, :cars, :essays,
-           :categorizations
+           :categorizations, :jobs
 
   def setup
     Client.destroyed_client_ids.clear
@@ -63,6 +66,13 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
     assert_operator dev.developer_projects.count, :>, 0
     assert_equal named.projects.map(&:id).sort,
                  dev.developer_projects.map(&:project_id).sort
+  end
+
+  def test_has_many_build_with_options
+    college = College.create(name: 'UFMT')
+    student = Student.create(active: true, college_id: college.id, name: 'Sarah')
+
+    assert_equal college.students, Student.where(active: true, college_id: college.id)
   end
 
   def test_create_from_association_should_respect_default_scope
@@ -107,6 +117,19 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
     car.funky_bulbs.create!
     assert_nothing_raised { car.reload.funky_bulbs.delete_all }
     assert_equal 0, Bulb.count, "bulbs should have been deleted using :delete_all strategy"
+  end
+
+  def test_delete_all_on_association_is_the_same_as_not_loaded
+    author = authors :david
+    author.thinking_posts.create!(:body => "test")
+    author.reload
+    expected_sql = capture_sql { author.thinking_posts.delete_all }
+
+    author.thinking_posts.create!(:body => "test")
+    author.reload
+    author.thinking_posts.inspect
+    loaded_sql = capture_sql { author.thinking_posts.delete_all }
+    assert_equal(expected_sql, loaded_sql)
   end
 
   def test_building_the_associated_object_with_implicit_sti_base_class
@@ -1831,13 +1854,5 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
         end
       end
     end
-  end
-
-  test 'has_many_association passes context validation to validate children' do
-    pirate = FamousPirate.new
-    pirate.famous_ships << ship = FamousShip.new
-    assert_equal true, pirate.valid?
-    assert_equal false, pirate.valid?(:conference)
-    assert_equal "can't be blank", ship.errors[:name].first
   end
 end

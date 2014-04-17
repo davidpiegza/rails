@@ -1,4 +1,58 @@
-*   Added `Object#present_in` to simplify value whitelisting.
+*   Fixed `ActiveSupport::Duration#eql?` so that `1.second.eql?(1.second)` is
+    true.
+
+    This fixes the current situation of:
+
+        1.second.eql?(1.second) #=> false
+
+    `eql?` also requires that the other object is an `ActiveSupport::Duration`.
+    This requirement makes `ActiveSupport::Duration`'s behavior consistent with
+    the behavior of Ruby's numeric types:
+
+        1.eql?(1.0) #=> false
+        1.0.eql?(1) #=> false
+
+        1.second.eql?(1) #=> false (was true)
+        1.eql?(1.second) #=> false
+
+        { 1 => "foo", 1.0 => "bar" }
+        #=> { 1 => "foo", 1.0 => "bar" }
+
+        { 1 => "foo", 1.second => "bar" }
+        # now => { 1 => "foo", 1.second => "bar" }
+        # was => { 1 => "bar" }
+
+    And though the behavior of these hasn't changed, for reference:
+
+        1 == 1.0 #=> true
+        1.0 == 1 #=> true
+
+        1 == 1.second #=> true
+        1.second == 1 #=> true
+
+    *Emily Dobervich*
+
+*   `ActiveSupport::SafeBuffer#prepend` acts like `String#prepend` and modifies
+    instance in-place, returning self. `ActiveSupport::SafeBuffer#prepend!` is
+    deprecated.
+
+    *Pavel Pravosud*
+
+*   `HashWithIndifferentAccess` better respects `#to_hash` on objects it's
+    given. In particular `#update`, `#merge`, `#replace` all accept objects
+    which respond to `#to_hash`, even if those objects are not Hashes directly.
+
+    Currently, if `HashWithIndifferentAccess.new` is given a non-Hash (even if
+    it responds to `#to_hash`) that object is treated as the default value,
+    rather than the initial keys and value. Changing that could break existing
+    code, so it will be updated in the next minor version.
+
+    *Peter Jaros*
+
+
+## Rails 4.1.0 (April 8, 2014) ##
+
+*   Added `Object#presence_in` to simplify value whitelisting.
 
     Before:
 
@@ -6,7 +60,7 @@
 
     After:
 
-        params[:bucket_type].present_in %w( project calendar )
+        params[:bucket_type].presence_in %w( project calendar )
 
     *DHH*
 
@@ -38,8 +92,10 @@
 *   Deprecate custom `BigDecimal` serialization.
 
     Deprecate the custom `BigDecimal` serialization that is included when requiring
-    `active_support/all` as a fix for #12467. Let Ruby handle YAML serialization
-    for `BigDecimal` instead.
+    `active_support/all`. Let Ruby handle YAML serialization for `BigDecimal`
+    instead.
+
+    Fixes #12467.
 
     *David Celis*
 
@@ -233,13 +289,6 @@
     wrong value as it was entered.
 
     *Gonzalo Rodríguez-Baltanás Díaz*
-
-*   Both `cattr_*` and `mattr_*` method definitions now live in `active_support/core_ext/module/attribute_accessors`.
-
-    Requires to `active_support/core_ext/class/attribute_accessors` are
-    deprecated and will be removed in Ruby on Rails 4.2.
-
-    *Genadi Samokovarov*
 
 *   Deprecated `Numeric#{ago,until,since,from_now}`, the user is expected to explicitly
     convert the value into an AS::Duration, i.e. `5.ago` => `5.seconds.ago`

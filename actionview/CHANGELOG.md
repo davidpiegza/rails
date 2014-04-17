@@ -1,3 +1,48 @@
+*   `collection_check_boxes` respects `:index` option for the hidden filed name.
+
+    Fixes #14147.
+
+    *Vasiliy Ermolovich*
+
+*   `date_select` helper with option `with_css_classes: true` does not overwrite other classes.
+
+    *Izumi Wong-Horiuchi*
+
+
+## Rails 4.1.0 (April 8, 2014) ##
+
+*   Fixed ActionView::Digestor template lookup to use the lookup_context exclusively, and not rely on the passed-in format.
+    This unfortunately means that the cache_key changed, so upgrading will invalidate all prior caches. Take note if you rely
+    heavily on caching in production when you push this live.
+
+    *DHH*
+
+*   `number_to_percentage` does not crash with `Float::NAN` or `Float::INFINITY`
+    as input.
+
+    Fixes #14405.
+
+    *Yves Senn*
+
+*   Take variants into account when calculating template digests in ActionView::Digestor.
+
+    The arguments to ActionView::Digestor#digest are now being passed as a hash
+    to support variants and allow more flexibility in the future. The support for
+    regular (required) arguments is deprecated and will be removed in Rails 5.0 or later.
+
+    *Piotr Chmolowski, Łukasz Strzałkowski*
+
+*   Fixed a problem where the default options for the `button_tag` helper is not
+    applied correctly.
+
+    Fixes #14255.
+
+    *Sergey Prikhodko*
+
+*   Fix ActionView label translation for more than 10 nested elements.
+
+    *Vladimir Krylov*
+
 *   Added `:plain`, `:html` and `:body` option for `render` method. Please see
     Action Pack's release note for more detail.
 
@@ -320,7 +365,7 @@
 
     *Bryan Ricker*
 
-*   First release, ActionView extracted from ActionPack
+*   First release, ActionView extracted from ActionPack.
 
     *Piotr Sarnacki*, *Łukasz Strzałkowski*
 

@@ -1,3 +1,35 @@
+*   Fix `console` and `generators` blocks defined at different environments.
+
+    Fixes #14748.
+
+    *Rafael Mendonça França*
+
+*   Move configuration of asset precompile list and version to an initializer.
+
+    *Matthew Draper*
+
+*   Do not set the Rails environment to test by default when using test_unit Railtie.
+
+    *Konstantin Shabanov*
+
+
+## Rails 4.1.0 (April 8, 2014) ##
+
+*   Introduce `Rails.gem_version` as a convenience method to return
+    `Gem::Version.new(Rails.version)`, suggesting a more reliable way to perform
+    version comparison.
+
+    Example:
+
+        Rails.version #=> "4.1.2"
+        Rails.gem_version #=> #<Gem::Version "4.1.2">
+
+        Rails.version > "4.1.10" #=> false
+        Rails.gem_version > Gem::Version.new("4.1.10") #=> true
+        Gem::Requirement.new("~> 4.1.2") =~ Rails.gem_version #=> true
+
+    *Prem Sichanugrist*
+
 *   Do not crash when `config/secrets.yml` is empty.
 
     *Yves Senn*
@@ -24,13 +56,6 @@
 *   Use single quotes in generated files.
 
     *Cristian Mircea Messel*, *Chulki Lee*
-
-*   Only lookup `config.log_level` for stdlib `::Logger` instances.
-    Assign it as is for third party loggers like `Log4r::Logger`.
-
-    Fixes #13421.
-
-    *Yves Senn*
 
 *   The `Gemfile` of new applications depends on SDoc ~> 0.4.0.
 
@@ -117,6 +142,7 @@
     *Jon Leighton*
 
 *   Uses .railsrc while creating new plugin if it is available.
+
     Fixes #10700.
 
     *Prathamesh Sonpatki*

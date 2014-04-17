@@ -64,7 +64,7 @@ module ActiveRecord
     end
 
     # Returns true if this object hasn't been saved yet -- that is, a record
-    # for the object doesn't exist in the data store yet; otherwise, returns false.
+    # for the object doesn't exist in the database yet; otherwise, returns false.
     def new_record?
       sync_with_transaction_state
       @new_record
@@ -450,6 +450,8 @@ module ActiveRecord
         changed_attributes.except!(*changes.keys)
         primary_key = self.class.primary_key
         self.class.unscoped.where(primary_key => self[primary_key]).update_all(changes) == 1
+      else
+        true
       end
     end
 
@@ -484,11 +486,11 @@ module ActiveRecord
     # Updates the associated record with values matching those of the instance attributes.
     # Returns the number of affected rows.
     def _update_record(attribute_names = @attributes.keys)
-      attributes_with_values = arel_attributes_with_values_for_update(attribute_names)
-      if attributes_with_values.empty?
+      attributes_values = arel_attributes_with_values_for_update(attribute_names)
+      if attributes_values.empty?
         0
       else
-        self.class.unscoped.update_record attributes_values, id, id_was
+        self.class.unscoped._update_record attributes_values, id, id_was
       end
     end
 
