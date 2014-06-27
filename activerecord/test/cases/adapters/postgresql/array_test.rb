@@ -34,9 +34,31 @@ class PostgresqlArrayTest < ActiveRecord::TestCase
     assert_not ratings_column.number?
   end
 
+  def test_default
+    @connection.add_column 'pg_arrays', 'score', :integer, array: true, default: [4, 4, 2]
+    PgArray.reset_column_information
+    column = PgArray.columns_hash["score"]
+
+    assert_equal([4, 4, 2], column.default)
+    assert_equal([4, 4, 2], PgArray.new.score)
+  ensure
+    PgArray.reset_column_information
+  end
+
+  def test_default_strings
+    @connection.add_column 'pg_arrays', 'names', :string, array: true, default: ["foo", "bar"]
+    PgArray.reset_column_information
+    column = PgArray.columns_hash["names"]
+
+    assert_equal(["foo", "bar"], column.default)
+    assert_equal(["foo", "bar"], PgArray.new.names)
+  ensure
+    PgArray.reset_column_information
+  end
+
   def test_change_column_with_array
     @connection.add_column :pg_arrays, :snippets, :string, array: true, default: []
-    @connection.change_column :pg_arrays, :snippets, :text, array: true, default: "{}"
+    @connection.change_column :pg_arrays, :snippets, :text, array: true, default: []
 
     PgArray.reset_column_information
     column = PgArray.columns.find { |c| c.name == 'snippets' }
@@ -44,6 +66,14 @@ class PostgresqlArrayTest < ActiveRecord::TestCase
     assert_equal :text, column.type
     assert_equal [], column.default
     assert column.array
+  end
+
+  def test_change_column_default_with_array
+    @connection.change_column_default :pg_arrays, :tags, []
+
+    PgArray.reset_column_information
+    column = PgArray.columns_hash['tags']
+    assert_equal [], column.default
   end
 
   def test_type_cast_array

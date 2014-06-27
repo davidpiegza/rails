@@ -1,11 +1,43 @@
+*   Make Dependencies pass a name to NameError error.
+    *arthurnn*, *Yuki Nishijima*
+
+
+## Rails 4.0.6 (June 26, 2014) ##
+
+*   `Hash#deep_transform_keys` and `Hash#deep_transform_keys!` now transform hashes
+    in nested arrays.  This change also applies to `Hash#deep_stringify_keys`,
+    `Hash#deep_stringify_keys!`, `Hash#deep_symbolize_keys` and
+    `Hash#deep_symbolize_keys!`.
+
+    *OZAWA Sakuro*
+
+*   `HashWithIndifferentAccess` better respects `#to_hash` on objects it's
+    given. In particular `#update`, `#merge`, `#replace` all accept objects
+    which respond to `#to_hash`, even if those objects are not Hashes directly.
+
+    Currently, if `HashWithIndifferentAccess.new` is given a non-Hash (even if
+    it responds to `#to_hash`) that object is treated as the default value,
+    rather than the initial keys and value. Changing that could break existing
+    code, so it will be updated in 4.2.
+
+    *Peter Jaros*
+
+
+## Rails 4.0.5 (May 6, 2014) ##
+
+*No changes*
+
+
+## Rails 4.0.4 (March 14, 2014) ##
+
 *   Fix parsing bugs in `XmlMini`
 
-    Symbols or boolean parsing would raise an error for non string values (e.g. 
+    Symbols or boolean parsing would raise an error for non string values (e.g.
     integers). Decimal parsing would fail due to a missing requirement.
 
     *Birkir A. Barkarson*
 
-*   Re-enable support for iterating over `DateTIme` ranges
+*   Re-enable support for iterating over `DateTime` ranges
 
     Fixes #13667.
 
@@ -36,6 +68,16 @@
 *   Fix `slice!` deleting the default value of the hash.
 
     *Antonio Santos*
+
+
+## Rails 4.0.3 (February 18, 2014) ##
+
+*No changes*
+
+
+## Rails 4.0.2 (December 02, 2013) ##
+
+*No changes*
 
 
 ## Rails 4.0.1 (November 01, 2013) ##

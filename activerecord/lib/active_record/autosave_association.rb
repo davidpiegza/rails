@@ -359,6 +359,7 @@ module ActiveRecord
 
             raise ActiveRecord::Rollback unless saved
           end
+          @new_record_before_save = false unless reflection.macro == :has_and_belongs_to_many
         end
 
         # reconstruct the scope now that we know the owner's id
@@ -382,9 +383,10 @@ module ActiveRecord
 
         if autosave && record.marked_for_destruction?
           record.destroy
-        else
+        elsif autosave != false
           key = reflection.options[:primary_key] ? send(reflection.options[:primary_key]) : id
-          if autosave != false && (autosave || new_record? || record_changed?(reflection, record, key))
+
+          if (autosave && record.changed_for_autosave?) || new_record? || record_changed?(reflection, record, key)
             unless reflection.through_reflection
               record[reflection.foreign_key] = key
             end

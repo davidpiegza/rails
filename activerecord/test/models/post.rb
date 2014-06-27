@@ -142,6 +142,10 @@ class Post < ActiveRecord::Base
     ranked_by_comments.limit_by(limit)
   end
 
+  def self.written_by(author)
+    where(id: author.posts.pluck(:id))
+  end
+
   def self.reset_log
     @log = []
   end
@@ -194,4 +198,13 @@ end
 class SpecialPostWithDefaultScope < ActiveRecord::Base
   self.table_name = 'posts'
   default_scope { where(:id => [1, 5,6]) }
+end
+
+class PostThatLoadsCommentsInAnAfterSaveHook < ActiveRecord::Base
+  self.table_name = 'posts'
+  has_many :comments, class_name: "CommentThatAutomaticallyAltersPostBody", foreign_key: :post_id
+
+  after_save do |post|
+    post.comments.load
+  end
 end

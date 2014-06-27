@@ -87,7 +87,8 @@ module ActiveRecord
         else
           # If B < A and A defines its own attribute method, then we don't want to overwrite that.
           defined = method_defined_within?(method_name, superclass, superclass.generated_attribute_methods)
-          defined && !ActiveRecord::Base.method_defined?(method_name) || super
+          base_defined = Base.method_defined?(method_name) || Base.private_method_defined?(method_name)
+          defined && !base_defined || super
         end
       end
 
@@ -160,6 +161,7 @@ module ActiveRecord
           # this is probably horribly slow, but should only happen at most once for a given AR class
           attribute_method.bind(self).call(*args, &block)
         else
+          return super unless respond_to_missing?(method, true)
           send(method, *args, &block)
         end
       else

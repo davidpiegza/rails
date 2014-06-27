@@ -1,3 +1,270 @@
+*   `has_many :through` associations will no longer save the through record
+    twice when added in an `after_create` callback defined before the
+    associations.
+
+    *Sean Griffin*
+
+*   Correctly extract IPv6 addresses from `DATABASE_URI`: the square brackets
+    are part of the URI structure, not the actual host.
+
+    Fixes #15705.
+
+    *Andy Bakun*, *Aaron Stone*
+
+*   Don't error when quoting user defined types in PostgreSQL.
+
+    Fixes #15697.
+
+    *Sean Griffin*
+
+*   `ActiveRecord::FinderMethods.find` with block can handle proc parameter as
+    `Enumerable#find` does.
+
+    Fixes #15382.
+
+    *James Yang*
+
+*   `ActiveRecord::SchemaMigration` has no primary key regardless of the
+    `primary_key_prefix_type` configuration.
+
+    Fixes #15051.
+
+    *JoseLuis Torres*, *Yves Senn*
+
+*   `rake db:migrate:status` works with legacy migration numbers like `00018_xyz.rb`.
+
+    Fixes #15538.
+
+    *Yves Senn*
+
+*   Fixed `columns_for_distinct` of postgresql adapter to work correctly
+    with orders without sort direction modifiers.
+
+    *Nikolay Kondratyev*
+
+*   `rake railties:install:migrations` respects the order of railties.
+
+    *Arun Agrawal*
+
+
+## Rails 4.0.6 (June 26, 2014) ##
+
+*   Fixed the inferred table name of a has_and_belongs_to_many auxiliar
+    table inside a schema.
+
+    Fixes #14824
+
+    *Eric Chahin*
+
+*   Fix bug that added `table_name_prefix` and `table_name_suffix` to
+    extension names in PostgreSQL when migrating.
+
+    *Joao Carlos*
+
+*   `ActiveRecord::Relation::Merger#filter_binds` now compares equivalent symbols and
+    strings in column names as equal.
+
+    This fixes a rare case in which more bind values are passed than there are
+    placeholders for them in the generated SQL statement, which can make PostgreSQL
+    throw a `StatementInvalid` exception.
+
+    *Nat Budin*
+
+*   Calling `delete_all` on an unloaded `CollectionProxy` no longer
+    generates a SQL statement containing each id of the collection:
+
+    Before:
+
+        DELETE FROM `model` WHERE `model`.`parent_id` = 1
+        AND `model`.`id` IN (1, 2, 3...)
+
+    After:
+
+        DELETE FROM `model` WHERE `model`.`parent_id` = 1
+
+    *Eileen M. Uchitelle*, *Aaron Patterson*
+
+*   Fix `stored_attributes` to correctly merge the details of stored
+    attributes defined in parent classes.
+
+    Fixes #14672.
+
+    *Brad Bennett*, *Jessica Yao*, *Lakshmi Parthasarathy*
+
+*   Fix bug where `ActiveRecord::Store` used a global `Hash` to keep track of
+    all registered `stored_attributes`. Now every subclass of
+    `ActiveRecord::Base` has it's own `Hash`.
+
+    *Yves Senn*
+
+*   `change_column_default` allows `[]` as argument to `change_column_default`.
+
+    Fixes #11586.
+
+    *Yves Senn*
+
+*   Fixed has_and_belongs_to_many's CollectionAssociation size calculation.
+
+    has_and_belongs_to_many should not include new records as part of
+    `#count_records` as new records are already counted.
+
+    Fixes #14914.
+
+    *Fred Wu*
+
+*   Stringify all variables keys of MySQL connection configuration.
+
+    When `sql_mode` variable for MySQL adapters set in configuration as `String`
+    was ignored and overwritten by strict mode option.
+
+    Fixes #14895.
+
+    *Paul Nikitochkin*
+
+*   Ensure SQLite3 statements are closed on errors.
+
+    Fixes: #13631.
+
+    *Timur Alperovich*
+
+*   When joining tables with a default scope, ensure the generated table name
+    in the `ON` conditions from the default scope is correctly aliased.
+
+    Backports #14154.
+
+    *Matt Jones*
+
+*   Fix name collision with `Array#select!` with `Relation#select!`.
+
+    Fixes #14752.
+
+    *Earl St Sauver*
+
+*   When a destroyed record is duped, the dup is not `destroyed?`.
+
+    *Kuldeep Aggarwal*
+
+*   Fixed has_many association to make it support irregular inflections.
+
+    Fixes #8928.
+
+    *arthurnn*, *Javier Goizueta*
+
+*   Fixed a problem where count used with a grouping was not returning a Hash.
+
+    Fixes #14721.
+
+    *Eric Chahin*
+
+*   Do not quote uuid default value on `change_column`.
+
+    Fixes #14604.
+
+    *Eric Chahin*
+
+*   The comparison between `Relation` and `CollectionProxy` should be consistent.
+
+    Example:
+
+        author.posts == Post.where(author_id: author.id)
+        # => true
+        Post.where(author_id: author.id) == author.posts
+        # => true
+
+    Fixes #13506.
+
+    *Lauro Caetano*
+
+*   PostgreSQL adapter only warns once for every missing OID per connection.
+
+    Fixes #14275.
+
+    *Matthew Draper*, *Yves Senn*
+
+*   Fix insertion of records via `has_many :through` association with scope.
+
+    Fixes #3548.
+
+    *Ivan Antropov*
+
+*   Make possible to have an association called `records`.
+
+    Fixes #11645.
+
+    *prathamesh-sonpatki*
+
+*   `to_sql` on an association now matches the query that is actually executed, where it
+    could previously have incorrectly accrued additional conditions (e.g. as a result of
+    a previous query). `CollectionProxy` now always defers to the association scope's
+    `arel` method so the (incorrect) inherited one should be entirely concealed.
+
+    Fixes #14003.
+
+    *Jefferson Lai*
+
+*   Fixed error when using `with_options` with lambda.
+
+    Fixes #9805.
+
+    *Lauro Caetano*
+
+*   Fixed error when specifying a non-empty default value on a PostgreSQL array column.
+
+    Fixes #10613.
+
+    *Luke Steensen*
+
+*   Fixed error where `#persisted?` throws `SystemStackError` for an unsaved model with a
+    custom primary key that didn't save due to validation error.
+
+    Fixes #14393.
+
+    *Chris Finne*
+
+*   `rake db:structure:dump` only dumps schema information if the schema
+    migration table exists.
+
+    Fixes #14217.
+
+    *Yves Senn*
+
+*   Fix counter cache when association uses a `class_name`.
+
+    Fixes #14369.
+
+    *arthurnn*
+
+*   Add support for `Relation` be passed as parameter on `QueryCache#select_all`.
+
+    Fixes #14361.
+
+    *arthurnn*
+
+
+## Rails 4.0.5 (May 6, 2014) ##
+
+*No changes*
+
+
+## Rails 4.0.4 (March 14, 2014) ##
+
+*   Only save has_one associations if record has changes.
+    Previously after save related callbacks, such as `#after_commit`, were triggered when the has_one
+    object did not get saved to the db.
+
+    *Alan Kennedy*
+
+*   Fixed STI classes not defining an attribute method if there is a
+    conflicting private method defined on its ancestors.
+
+    Fixes #11569.
+
+    *Godfrey Chan*
+
+*   Fix validation on uniqueness of empty association.
+
+    *Evgeny Li*
+
 *   Perform necessary deeper encoding when hstore is inside an array.
 
     Fixes #11135.
@@ -38,7 +305,7 @@
     not supported by the ActiveRecord schema dumper. For example, expressions
     indexes would not be detected.
 
-    This fixes #11018.
+    Fixes #11018.
 
     *Jonathan Baudanza*
 
@@ -248,7 +515,7 @@
 *   `ActiveRecord::ConnectionAdapters.string_to_time` respects
     string with timezone (e.g. Wed, 04 Sep 2013 20:30:00 JST).
 
-    Fixes: #12278, #12459
+    Fixes #12278, #12459.
 
     *kennyj*, *George Guimarães*
 

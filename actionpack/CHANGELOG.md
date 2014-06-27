@@ -1,3 +1,110 @@
+*   Added `config.action_view.raise_on_missing_translations` to define whether an
+    error should be raised for missing translations.
+
+    Fixes #13196
+
+    *Kassio Borges*
+
+*   ActionController::Parameters#require now accepts `false` values.
+
+    Fixes #15685.
+
+    *Sergio Romano*
+
+*   With authorization header `Authorization: Token token=`, `authenticate` now
+    recognize token as nil, instead of "token".
+
+    Fixes #14846.
+
+    *Larry Lv*
+
+
+## Rails 4.0.6 (June 26, 2014) ##
+
+*   Fix URL generation with `:trailing_slash` such that it does not add
+    a trailing slash after `.:format`
+
+    *Dan Langevin*
+
+*   Fix `'Stack level too deep'` when rendering `head :ok` in an action method
+    called 'status' in a controller.
+
+    Fixes #13905.
+
+    *Christiaan Van den Poel*
+
+*   Always use the provided port if the protocol is relative.
+
+    Fixes #15043.
+
+    *Guilherme Cavalcanti*, *Andrew White*
+
+*   Change `asset_path` to use File.join to create proper paths.
+
+        https://some.host.com//assets/some.js
+
+    becomes
+
+        https://some.host.com/assets/some.js
+
+    *Peter Schröder*
+
+*   Returns null type format when format is not known and controller is using `any`
+    format block.
+
+    Fixes #14462.
+
+    *Rafael Mendonça França*
+
+*   `collection_check_boxes` respects `:index` option for the hidden field name.
+
+    Fixes #14147.
+
+    *Vasiliy Ermolovich*
+
+*   Only make deeply nested routes shallow when parent is shallow.
+
+    Fixes #14684.
+
+    *Andrew White*, *James Coglan*
+
+*   `date_select` helper with option `with_css_classes: true` does not overwrite other classes.
+
+    *Izumi Wong-Horiuchi*
+
+*   Swaps the parameters of `assert_equal` in `assert_select` so that the
+    proper values are printed correctly.
+
+    Fixes #14422.
+
+    *Vishal Lal*
+
+*   The method `shallow?` returns false if the parent resource is a singleton so
+    we need to check if we're not inside a nested scope before copying the `:path`
+    and `:as` options to their shallow equivalents.
+
+    Fixes #14388.
+
+    *Andrew White*
+
+
+## Rails 4.0.5 (May 6, 2014) ##
+
+*   Only accept actions without File::SEPARATOR in the name.
+
+    This will avoid directory traversal in implicit render.
+
+    Fixes: CVE-2014-0130
+
+    *Rafael Mendonça França*
+
+
+## Rails 4.0.4 (March 14, 2014) ##
+
+*   Fix label translation for more than 10 nested elements.
+
+    *Vladimir Krylov*
+
 *   Use a custom route visitor for optimized url generation. Fixes #13349.
 
     *Andrew White*
@@ -30,13 +137,13 @@
 
 *   Unique the segment keys array for non-optimized url helpers
 
-    In Rails 3.2 you only needed pass an argument for dynamic segment once so
+    In Rails 3.2 you only needed to pass an argument for a dynamic segment once so
     unique the segment keys array to match the number of args. Since the number
-    of args is less than required parts the non-optimized code path is selected.
-    This means to benefit from optimized url generation the arg needs to be
-    specified as many times as it appears in the path.
+    of args is less than required parts, the non-optimized code path is selected.
+    To benefit from optimized url generation, the arg needs to be specified as
+    many times as it appears in the path.
 
-    Fixes #12808
+    Fixes #12808.
 
     *Andrew White*
 
@@ -46,7 +153,7 @@
     in the error message. Previously it would only show the contraints that were
     required as part of the path.
 
-    Fixes #13592
+    Fixes #13592.
 
     *Andrew White*
 
@@ -62,26 +169,26 @@
 
     This now redirects to the path `/blog`, whereas before it would redirect
     to the application root path. In the case of a path redirect or a custom
-    redirect if the path returned contains a host then the path is treated as
+    redirect, if the path returned contains a host then the path is treated as
     absolute. Similarly for option redirects, if the options hash returned
     contains a `:host` or `:domain` key then the path is treated as absolute.
 
-    Fixes #7977
+    Fixes #7977.
 
     *Andrew White*
 
 *   Fix `Encoding::CompatibilityError` when public path is UTF-8
 
     In #5337 we forced the path encoding to ASCII-8BIT to prevent static file handling
-    from blowing up before an application has had chance to deal with possibly invalid
-    urls. However this has a negative side effect of making it an incompatible encoding
-    if the application's public path has UTF-8 characters in it.
+    from blowing up before an application has had a chance to deal with possibly
+    invalid urls. However this has a negative side effect of making it an incompatible
+    encoding if the application's public path has UTF-8 characters in it.
 
     To work around the problem we check to see if the path has a valid encoding once
     it has been unescaped. If it is not valid then we can return early since it will
     not match any file anyway.
 
-    Fixes #13518
+    Fixes #13518.
 
     *Andrew White*
 
@@ -91,7 +198,7 @@
 
 *   Converts hashes in arrays of unfiltered params to unpermitted params.
 
-    Fixes #13382
+    Fixes #13382.
 
     *Xavier Noria*
 
@@ -100,7 +207,7 @@
     *Ryunosuke SATO*
 
 *   Label tags generated by collection helpers only inherit the `:index` and
-    `:namespace` from the input, because only these attributes modifies the
+    `:namespace` from the input, because only these attributes modify the
     `for` attribute of the label. Also, the input attributes don't have
     precedence over the label attributes anymore.
 
@@ -131,7 +238,7 @@
 
     *Shota Fukumori (sora_h)*
 
-*   Fix render of localized templates without an explicit format using wrong
+*   Fix rendering localized templates without an explicit format using wrong
     content header and not passing correct formats to template due to the
     introduction of the `NullType` for mimes.
 
@@ -239,7 +346,7 @@
 
     *kennyj*
 
-*   Fix custom flash type definition. Misusage of the `_flash_types` class variable
+*   Fix custom flash type definition. Misuse of the `_flash_types` class variable
     caused an error when reloading controllers with custom flash types.
 
     Fixes #12057.
@@ -371,7 +478,7 @@
 
     *Murahashi Sanemat Kenichi*
 
-*   Fix "Stack Level Too Deep" error when redering recursive partials.
+*   Fix "Stack Level Too Deep" error when rendering recursive partials.
 
     Fixes #11340.
 

@@ -96,7 +96,7 @@ module ActionController
       end
 
       def user_name_and_password(request)
-        decode_credentials(request).split(/:/, 2)
+        decode_credentials(request).split(':', 2)
       end
 
       def decode_credentials(request)
@@ -109,8 +109,8 @@ module ActionController
 
       def authentication_request(controller, realm)
         controller.headers["WWW-Authenticate"] = %(Basic realm="#{realm.gsub(/"/, "")}")
-        controller.response_body = "HTTP Basic: Access denied.\n"
         controller.status = 401
+        controller.response_body = "HTTP Basic: Access denied.\n"
       end
     end
 
@@ -244,8 +244,8 @@ module ActionController
       def authentication_request(controller, realm, message = nil)
         message ||= "HTTP Digest: Access denied.\n"
         authentication_header(controller, realm)
-        controller.response_body = message
         controller.status = 401
+        controller.response_body = message
       end
 
       def secret_token(request)
@@ -437,7 +437,7 @@ module ActionController
         authorization_request = request.authorization.to_s
         if authorization_request[TOKEN_REGEX]
           params = token_params_from authorization_request
-          [params.shift.last, Hash[params].with_indifferent_access]
+          [params.shift[1], Hash[params].with_indifferent_access]
         end
       end
 
@@ -452,7 +452,7 @@ module ActionController
 
       # This removes the `"` characters wrapping the value.
       def rewrite_param_values(array_params)
-        array_params.each { |param| param.last.gsub! %r/^"|"$/, '' }
+        array_params.each { |param| (param[1] || "").gsub! %r/^"|"$/, '' }
       end
 
       # This method takes an authorization body and splits up the key-value

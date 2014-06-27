@@ -14,6 +14,7 @@ require 'models/car'
 require 'models/engine'
 require 'models/tyre'
 require 'models/minivan'
+require 'models/aircraft'
 
 
 class RelationTest < ActiveRecord::TestCase
@@ -303,6 +304,16 @@ class RelationTest < ActiveRecord::TestCase
     assert_equal({ 'salary' => 100_000 }, Developer.none.where(salary: 100_000).where_values_hash)
   end
 
+
+  def test_null_relation_count
+    ac = Aircraft.new
+    assert_equal Hash.new, ac.engines.group(:id).count
+    assert_equal        0, ac.engines.count
+    ac.save
+    assert_equal Hash.new, ac.engines.group(:id).count
+    assert_equal        0, ac.engines.count
+  end
+
   def test_joins_with_nil_argument
     assert_nothing_raised { DependentFirm.joins(nil).first }
   end
@@ -501,6 +512,12 @@ class RelationTest < ActiveRecord::TestCase
     posts = Post.preload(:last_comment)
     post = posts.find { |p| p.id == 1 }
     assert_equal Post.find(1).last_comment, post.last_comment
+  end
+
+  def test_to_sql_on_scoped_proxy
+    auth = Author.first
+    Post.where("1=1").written_by(auth)
+    assert_not auth.posts.to_sql.include?("1=1")
   end
 
   def test_loading_with_one_association_with_non_preload
@@ -1625,5 +1642,10 @@ class RelationTest < ActiveRecord::TestCase
 
     merged = left.merge(right)
     assert_equal post, merged.first
+  end
+
+  def test_merging_compares_symbols_and_strings_as_equal
+    post = PostThatLoadsCommentsInAnAfterSaveHook.create!(title: "First Post", body: "Blah blah blah.")
+    assert_equal "First comment!", post.comments.where(body: "First comment!").first_or_create.body
   end
 end

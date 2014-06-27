@@ -302,6 +302,19 @@ class TimestampTest < ActiveRecord::TestCase
     assert_not_equal time, pet.updated_at
   end
 
+  def test_timestamp_column_values_are_present_in_the_callbacks
+    klass = Class.new(ActiveRecord::Base) do
+      self.table_name = 'people'
+
+      before_create do
+        self.born_at = self.created_at
+      end
+    end
+
+    person = klass.create first_name: 'David'
+    assert_not_equal person.born_at, nil
+  end
+
   def test_timestamp_attributes_for_create
     toy = Toy.first
     assert_equal toy.send(:timestamp_attributes_for_create), [:created_at, :created_on]

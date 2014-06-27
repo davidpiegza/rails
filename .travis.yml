@@ -4,9 +4,10 @@ before_install:
 rvm:
   - 1.9.3
   - 2.0.0
-  - 2.1.0
+  - 2.1
+  - ruby-head
+  - rbx-2
   - jruby
-  - rbx
 env:
   - "GEM=railties"
   - "GEM=ap,am,amo,as"
@@ -17,7 +18,8 @@ env:
 matrix:
   allow_failures:
     - rvm: jruby
-    - rvm: rbx
+    - rvm: rbx-2
+    - rvm: ruby-head
   fast_finish: true
 notifications:
   email: false
@@ -32,3 +34,5 @@ notifications:
     rooms:
       - secure: "YA1alef1ESHWGFNVwvmVGCkMe4cUy4j+UcNvMUESraceiAfVyRMAovlQBGs6\n9kBRm7DHYBUXYC2ABQoJbQRLDr/1B5JPf/M8+Qd7BKu8tcDC03U01SMHFLpO\naOs/HLXcDxtnnpL07tGVsm0zhMc5N8tq4/L3SHxK7Vi+TacwQzI="
 bundler_args: --path vendor/bundle --without test
+services:
+  - memcached

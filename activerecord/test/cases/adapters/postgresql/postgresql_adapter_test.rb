@@ -305,10 +305,30 @@ module ActiveRecord
         assert_equal "posts.title, posts.updater_id AS alias_0", @connection.columns_for_distinct("posts.title", ["posts.updater_id desc nulls last"])
       end
 
+      def test_columns_for_distinct_without_order_specifiers
+        assert_equal "posts.title, posts.updater_id AS alias_0",
+          @connection.columns_for_distinct("posts.title", ["posts.updater_id"])
+
+        assert_equal "posts.title, posts.updater_id AS alias_0",
+          @connection.columns_for_distinct("posts.title", ["posts.updater_id nulls last"])
+
+        assert_equal "posts.title, posts.updater_id AS alias_0",
+          @connection.columns_for_distinct("posts.title", ["posts.updater_id nulls first"])
+      end
+
       def test_raise_error_when_cannot_translate_exception
         assert_raise TypeError do
           @connection.send(:log, nil) { @connection.execute(nil) }
         end
+      end
+
+      def test_only_warn_on_first_encounter_of_unknown_oid
+        warning = capture(:stderr) {
+          @connection.select_all "SELECT NULL::anyelement"
+          @connection.select_all "SELECT NULL::anyelement"
+          @connection.select_all "SELECT NULL::anyelement"
+        }
+        assert_match(/\Aunknown OID \d+: failed to recognize type of 'anyelement'. It will be treated as String.\n\z/, warning)
       end
 
       private

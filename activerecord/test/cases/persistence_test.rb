@@ -206,6 +206,22 @@ class PersistencesTest < ActiveRecord::TestCase
     assert_nothing_raised { Minimalistic.create!(:id => 2) }
   end
 
+  def test_save_with_duping_of_destroyed_object
+    developer = Developer.create(name: "Kuldeep")
+    developer.destroy
+    new_developer = developer.dup
+    new_developer.save
+    assert new_developer.persisted?
+  end
+
+  def test_dup_of_destroyed_object_is_not_destroyed
+    developer = Developer.create(name: "Kuldeep")
+    developer.destroy
+    new_developer = developer.dup
+    new_developer.save
+    assert_equal new_developer.destroyed?, false
+  end
+
   def test_create_many
     topics = Topic.create([ { "title" => "first" }, { "title" => "second" }])
     assert_equal 2, topics.size
@@ -786,4 +802,14 @@ class PersistencesTest < ActiveRecord::TestCase
     end
   end
 
+  def test_instantiate_creates_a_new_instance
+    post = Post.instantiate("title" => "appropriate documentation", "type" => "SpecialPost")
+    assert_equal "appropriate documentation", post.title
+    assert_instance_of SpecialPost, post
+
+    # body was not initialized
+    assert_raises ActiveModel::MissingAttributeError do
+      post.body
+    end
+  end
 end

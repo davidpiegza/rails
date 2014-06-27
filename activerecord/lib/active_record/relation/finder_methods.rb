@@ -31,7 +31,7 @@ module ActiveRecord
     #   end
     def find(*args)
       if block_given?
-        to_a.find { |*block_args| yield(*block_args) }
+        to_a.find(*args) { |*block_args| yield(*block_args) }
       else
         find_with_ids(*args)
       end
@@ -212,7 +212,7 @@ module ActiveRecord
 
     def construct_join_dependency_for_association_find
       including = (eager_load_values + includes_values).uniq
-      ActiveRecord::Associations::JoinDependency.new(@klass, including, [])
+      ActiveRecord::Associations::JoinDependency.new(@klass, including, joins_values)
     end
 
     def construct_relation_for_association_calculations

@@ -37,7 +37,7 @@ module ActiveRecord
       end
 
       # Given an attributes hash, +instantiate+ returns a new instance of
-      # the appropriate class.
+      # the appropriate class. Accepts only keys as strings.
       #
       # For example, +Post.all+ may return Comments, Messages, and Emails
       # by storing the record's subclass in a +type+ attribute. By calling
@@ -46,10 +46,10 @@ module ActiveRecord
       #
       # See +ActiveRecord::Inheritance#discriminate_class_for_record+ to see
       # how this "single-table" inheritance mapping is implemented.
-      def instantiate(record, column_types = {})
-        klass = discriminate_class_for_record(record)
+      def instantiate(attributes, column_types = {})
+        klass = discriminate_class_for_record(attributes)
         column_types = klass.decorate_columns(column_types.dup)
-        klass.allocate.init_with('attributes' => record, 'column_types' => column_types)
+        klass.allocate.init_with('attributes' => attributes, 'column_types' => column_types)
       end
 
       private
@@ -64,7 +64,7 @@ module ActiveRecord
     end
 
     # Returns true if this object hasn't been saved yet -- that is, a record
-    # for the object doesn't exist in the data store yet; otherwise, returns false.
+    # for the object doesn't exist in the database yet; otherwise, returns false.
     def new_record?
       sync_with_transaction_state
       @new_record
@@ -448,6 +448,8 @@ module ActiveRecord
         @changed_attributes.except!(*changes.keys)
         primary_key = self.class.primary_key
         self.class.unscoped.where(primary_key => self[primary_key]).update_all(changes) == 1
+      else
+        true
       end
     end
 
